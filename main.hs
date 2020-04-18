@@ -18,7 +18,9 @@ in3 =
 
 ways :: Ord k => [(k, k, a)] -> Map k (Map k a)
 ways [] = empty
-ways ((a, b, c):t) = update (\x->Just (insert b c x)) a (insert b (empty) (insert a (empty) (ways t)))
+ways ((a, b, c):t)
+  | member a (ways t) = update (\x->Just (insert b c x)) a (ways t) 
+  | otherwise = insert a (fromList [(b,c)]) (ways t)
 
 ff = update (\x->Just (insert 4 5 x)) 1 (fromList [(1,(fromList [(3,1)]))])
 ff1 = update (\x->Just (insert 6 5 x)) 1 (update (\x->Just (insert 4 5 x)) 1 (fromList [(1,(fromList [(3,1)]))]))
