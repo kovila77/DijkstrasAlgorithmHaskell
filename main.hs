@@ -18,9 +18,9 @@ in3 =
 
 ways [] = empty
 ways ((a, b, c):t)
-  | notMember a (ways t) && notMember b (ways t) = insert a (fromList [(b,c)]) (insert b empty (ways t))
-  | member a (ways t) && notMember b (ways t) = update (\x->Just (insert b c x)) a (ways t) 
-  | member a (ways t) = update (\x->Just (insert b c x)) a (insert b empty (ways t) )
+  | not (member a (ways t)) && not (member b (ways t)) = insert a (fromList [(b,c)]) (insert b empty (ways t))
+  | member a (ways t) && not (member b (ways t)) = update (\x->Just (insert b c x)) a (insert b empty (ways t)) 
+  | member a (ways t) = update (\x->Just (insert b c x)) a (ways t)
   | otherwise = insert a (fromList [(b,c)]) (ways t)
 
 wayLen vertexfrom ways = delete vertexfrom ways
