@@ -4,7 +4,7 @@ import Data.Maybe as Maybe
 import System.IO( Handle, FilePath, IOMode( ReadMode ), openFile, hGetLine, hPutStr, hClose, hIsEOF, stderr )
 
 import Control.Monad( when )
-
+import Data.Time
 in1 = 
   [(1, 2, 1), 
   (1, 5, 30), 
@@ -57,6 +57,13 @@ makeWays graph
 sayPathLength from to listGraph = wlft from to mapGraph (startWayLen from mapGraph) 0 
   where
     mapGraph = makeWays listGraph
+    startWayLen from ways = foldrWithKey (startWayLen' from) empty ways where
+      startWayLen' from k _ ks 
+        | (k == from) = ks
+        | otherwise = Map.insert k (-1) ks
+        
+sayLen from to ways = wlft from to ways (startWayLen from ways) 0 
+  where
     startWayLen from ways = foldrWithKey (startWayLen' from) empty ways where
       startWayLen' from k _ ks 
         | (k == from) = ks
@@ -134,12 +141,21 @@ dumpFile handle filename lineNumber acc
             Map.insert a (fromList [(b,c)]) (Map.insert b empty acc)
 
 
-main :: IO (Map Int (Map Int Int))
+main :: IO ()
 
 main = do
     hPutStr stderr "Type a filename: "
     filename <- getLine
+    hPutStr stderr "Type from: "
+    from <- getLine
+    hPutStr stderr "Type to: "
+    to <- getLine
     handle <- openFile filename ReadMode
-    graph <- (dumpFile handle filename 1 empty)
+    ways <- (dumpFile handle filename 1 empty)
     hClose handle
-    return (graph)
+    
+    begT <- getCurrentTime
+    putStrLn ( show (sayLen (read from::Int) (read to::Int) ways))
+    endT <- getCurrentTime
+    
+    putStrLn $ init $ show $ diffUTCTime endT begT
